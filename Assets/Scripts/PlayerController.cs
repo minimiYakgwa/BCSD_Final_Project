@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody playerRigid;
     CapsuleCollider playerCollider;
 
+    private bool isWalking = false;
     private bool isJumping = false;
     private bool isHit = false;
     private bool isRun = false;
@@ -42,10 +43,6 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        /*if (isHit)
-        {
-            return;
-        }*/
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
@@ -57,7 +54,7 @@ public class PlayerController : MonoBehaviour
         bool hasHorziontalInput = !Mathf.Approximately(horizontal, 0f);
         bool hasVerticalInput = !Mathf.Approximately(vertical, 0f);
 
-        bool isWalking = hasHorziontalInput || hasVerticalInput;
+        isWalking = hasHorziontalInput || hasVerticalInput;
 
         if (!isWalking)
         {
@@ -93,7 +90,7 @@ public class PlayerController : MonoBehaviour
     }
     private void TryRun()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) & !isHit)
         {
             isRun = !isRun;
             playerAnim.SetBool("isRun", isRun);
@@ -103,7 +100,7 @@ public class PlayerController : MonoBehaviour
 
     private void TryJump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && jumpCount <= 1)
+        if (Input.GetKeyDown(KeyCode.Space) && jumpCount <= 1 && !isHit)
         {
             if (jumpCount != 0)
             {
@@ -180,10 +177,21 @@ public class PlayerController : MonoBehaviour
         isHit = true;
         gameObject.layer = 6;
         
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(6f);
 
         isHit = false;
         gameObject.layer = 8;
+    }
+
+    public float GetPlayerHorizontal()
+    {
+        
+        return playerMovement.x;
+    }
+
+    public Vector3 GetPlayerMovement()
+    {
+        return playerMovement;
     }
 
 }
