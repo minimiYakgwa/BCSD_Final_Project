@@ -12,6 +12,9 @@ public class PlayerController : MonoBehaviour
     Rigidbody playerRigid;
     CapsuleCollider playerCollider;
 
+    [SerializeField]
+    Animator enemyAnim;
+
     private bool isWalking;
     private bool isJumping;
     private bool isHit;
@@ -155,6 +158,7 @@ public class PlayerController : MonoBehaviour
             playerRigid.AddForce(transform.forward * -1, ForceMode.Impulse);
             playerAnim.SetTrigger("isGaurd");
             isParry = false;
+            enemyAnim.SetTrigger("Hit");
         }
             
     }
