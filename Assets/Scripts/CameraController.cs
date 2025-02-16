@@ -1,21 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
     [SerializeField]
     PlayerController player;
-
-    [SerializeField]
-    private GameObject cameraLocation;
-
-    [SerializeField]
-    private float lookSensivity;
-    [SerializeField]
-    private float cameraRotationLimit;
-    private float currentCameraRotationX = 0f;
-    private float currentCameraRotationY = 0f;
 
     private void Start()
     {
@@ -26,5 +17,19 @@ public class CameraController : MonoBehaviour
     private void LateUpdate()
     {
         transform.position = player.transform.position;
+    }
+
+
+    public IEnumerator IsTurnCamera(Collider other)
+    {
+        Quaternion targetRot = transform.rotation * Quaternion.Euler(0f, 90f, 0f);
+            
+
+        while (Quaternion.Angle(transform.rotation, targetRot) > 0.1f)
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRot, 0.1f);
+            yield return null;
+        }
+        transform.rotation = targetRot;
     }
 }

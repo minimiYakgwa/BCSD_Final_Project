@@ -8,9 +8,19 @@ public class Obstacle : MonoBehaviour
 
     private void Update()
     {
-        transform.Translate(transform.forward * Time.deltaTime * speed * -1);
+        transform.Translate(Vector3.forward * Time.deltaTime * speed);
+    }
 
-        if (transform.position.z <= -11)
-            Destroy(gameObject);
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("ObstacleEndPoint"))
+            StartCoroutine(DestroyObstacle());
+    }
+
+    private IEnumerator DestroyObstacle()
+    {
+        yield return new WaitForSeconds(1f);
+
+        Destroy(gameObject);
     }
 }

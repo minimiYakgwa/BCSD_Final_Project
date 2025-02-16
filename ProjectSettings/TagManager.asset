@@ -8,6 +8,9 @@ TagManager:
   - Ground
   - Wall
   - Obstacle
+  - TurnPoint
+  - ObstacleEndPoint
+  - BehindEnemy
   layers:
   - Default
   - TransparentFX

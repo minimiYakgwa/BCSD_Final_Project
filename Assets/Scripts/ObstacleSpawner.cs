@@ -8,6 +8,8 @@ public class ObstacleSpawner : MonoBehaviour
     private GameObject[] vehicles;
     [SerializeField]
     private Transform[] spawnPoints;
+    [SerializeField]
+    private Transform spawnPointRotation;
 
     [SerializeField]
     private float maxSpawnDelay;
@@ -28,14 +30,14 @@ public class ObstacleSpawner : MonoBehaviour
     private void SpawnVehicles()
     {
         int spawnCount = Random.Range(1, 4);
-        Quaternion rotation = Quaternion.Euler(0, 180, 0);
+        Quaternion rotation = spawnPointRotation.rotation * Quaternion.Euler(0, 180, 0);
 
         for (int i = 0; i < spawnCount; i++)
         {
             int randomVehicle = Random.Range(1, vehicles.Length);
             int ranPoint = Random.Range(0, spawnPoints.Length);
 
-            Instantiate(vehicles[randomVehicle], spawnPoints[ranPoint].position, rotation);
+            Instantiate(vehicles[randomVehicle], spawnPoints[ranPoint].position, spawnPoints[ranPoint].rotation);
         }
         
     }
