@@ -18,6 +18,8 @@ public class ObstacleSpawner : MonoBehaviour
 
     private void Update()
     {
+        if (!GameManager.instance.isStart)
+            return;
         curSpawnDelay += Time.deltaTime;
 
         if (curSpawnDelay > maxSpawnDelay)
@@ -29,15 +31,25 @@ public class ObstacleSpawner : MonoBehaviour
 
     private void SpawnVehicles()
     {
-        int spawnCount = Random.Range(1, 4);
         Quaternion rotation = spawnPointRotation.rotation * Quaternion.Euler(0, 180, 0);
 
-        for (int i = 0; i < spawnCount; i++)
+        int ranPoint = Random.Range(0, spawnPoints.Length);
+        for (int i = 0; i < spawnPoints.Length; i++)
         {
-            int randomVehicle = Random.Range(1, vehicles.Length);
-            int ranPoint = Random.Range(0, spawnPoints.Length);
+            if (i == ranPoint)
+            {
+                Debug.Log("쓰레기통 생성!!");
+                Instantiate(vehicles[spawnPoints.Length-1], spawnPoints[i].position, spawnPoints[i].rotation);
+            }
+            else
+            {
+                int randomVehicle = Random.Range(1, vehicles.Length);
 
-            Instantiate(vehicles[randomVehicle], spawnPoints[ranPoint].position, spawnPoints[ranPoint].rotation);
+                Instantiate(vehicles[randomVehicle], spawnPoints[i].position, spawnPoints[i].rotation);
+            }
+                
+
+            
         }
         
     }

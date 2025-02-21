@@ -12,6 +12,8 @@ public class CameraController : MonoBehaviour
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
+
+        StartCoroutine(StartCamera());
     }
 
     private void LateUpdate()
@@ -31,5 +33,11 @@ public class CameraController : MonoBehaviour
             yield return null;
         }
         transform.rotation = targetRot;
+    }
+
+    private IEnumerator StartCamera()
+    {
+
+        yield return null;
     }
 }

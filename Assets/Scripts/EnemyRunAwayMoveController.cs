@@ -20,7 +20,7 @@ public class EnemyRunAwayMoveController : EnemyMoveController
 
     private void IsAttack()
     {
-        if (isAttack)
+        if (isAttack || !GameManager.instance.isStart)
             return;
 
         Collider[] colliders = Physics.OverlapBox(hitBoxCollider.bounds.center, hitBoxCollider.bounds.size / 2, Quaternion.identity, layerMask);
@@ -42,18 +42,6 @@ public class EnemyRunAwayMoveController : EnemyMoveController
 
         StartCoroutine(player.ParryTiming());
 
-        /*Debug.Log("공격 딜레이 카운트 :");
-        Debug.Log("5");
-        yield return new WaitForSeconds(1f);
-        Debug.Log("4");
-        yield return new WaitForSeconds(1f);
-        Debug.Log("3");
-        yield return new WaitForSeconds(1f);
-        Debug.Log("2");
-        yield return new WaitForSeconds(1f);
-        Debug.Log("1");
-        yield return new WaitForSeconds(1f);
-        Debug.Log("0");*/
         yield return new WaitForSeconds(5f);
         isAttack = false;
     }

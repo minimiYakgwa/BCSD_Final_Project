@@ -21,6 +21,8 @@ public class EnemyMoveController : MonoBehaviour
 
     protected void Move()
     {
+        if (!GameManager.instance.isStart)
+            return;
         Vector3 direction = turnPoints[count].position - transform.position;
         direction.y = 0f;
         float distance = direction.sqrMagnitude;
@@ -36,6 +38,7 @@ public class EnemyMoveController : MonoBehaviour
         }
         transform.Translate(Vector3.forward * Time.deltaTime * moveSpeed);
     }
+
 
 
     private void OnDrawGizmos()

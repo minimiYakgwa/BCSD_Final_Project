@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Mono.Cecil.Cil;
 using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -14,12 +15,15 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField]
     Animator enemyAnim;
+    [SerializeField]
+    private StatusController statusController;
 
     private bool isWalking;
     private bool isJumping;
     private bool isHit;
     private bool isRun;
     private bool isParry;
+    private bool isWall;
 
     
     [SerializeField]
@@ -28,11 +32,15 @@ public class PlayerController : MonoBehaviour
     private float jumpPower;
     [SerializeField]
     private float moveSpeed;
+    [SerializeField]
+    private float fallSpeed;
     private int jumpCount = 0;
 
 
     [SerializeField]
     private CameraController cameraController;
+    [SerializeField]
+    private PlaySceneUIManager playSceneUIManager;
 
     [SerializeField]
     private GameObject cameraLocation;
@@ -46,85 +54,154 @@ public class PlayerController : MonoBehaviour
         playerRigid = GetComponent<Rigidbody>();
         playerCollider = GetComponent<CapsuleCollider>();
 
-        Time.timeScale = 1f;
-
         isWalking = false;
         isJumping = false;
         isHit = false;
         isRun = false;
         isParry = false;
-}
+        isWall = false;
+
+        
+    }
 
     private void Update()
     {
+        if (!GameManager.instance.isStart)
+            return;
+
         TryJump();
         IsGround();
         TryRun();
         TryParry();
+        IsFall();
     }
 
     private void FixedUpdate()
     {
+        if (!GameManager.instance.isStart)
+            return;
         TryWalk();
     }
 
+    private void IsFall()
+    {
+        if (playerRigid.velocity.y <= 0 && transform.position.y > 0)
+            playerRigid.drag = 0f;
+        else
+        {
+            playerRigid.drag = 10f;
+        }
+    }
     private void TryWalk()
     {
-        if (isHit)
+        if (isHit || isWall)
             return;
 
-        if (jumpCount < 2)
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        Vector3 forward = cameraLocation.transform.forward;
+        Vector3 right = cameraLocation.transform.right;
+
+        forward.y = 0f;
+        right.y = 0f;
+
+        float y = playerRigid.velocity.y;
+        playerMovement = forward * horizontal * -1 + right * vertical;
+        playerMovement.Normalize();
+        //playerMovement.Set(playerMovement.x, y, playerMovement.z);
+
+        playerRigid.velocity = new Vector3(playerMovement.x * moveSpeed, y, playerMovement.z * moveSpeed);
+
+        bool hasHorziontalInput = !Mathf.Approximately(horizontal, 0f);
+        bool hasVerticalInput = !Mathf.Approximately(vertical, 0f);
+
+        isWalking = hasHorziontalInput || hasVerticalInput;
+
+        if (!isWalking)
         {
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
-
-            Vector3 forward = cameraLocation.transform.forward;
-            Vector3 right = cameraLocation.transform.right;
-
-            forward.y = 0f;
-            right.y = 0f;
-
-            playerMovement = forward * horizontal * -1 + right * vertical;
-
-            //playerMovement.Set(horizontal, 0f, vertical);
-            playerMovement.Normalize();
-
-            bool hasHorziontalInput = !Mathf.Approximately(horizontal, 0f);
-            bool hasVerticalInput = !Mathf.Approximately(vertical, 0f);
-
-            isWalking = hasHorziontalInput || hasVerticalInput;
-
-            if (!isWalking)
+            if (isRun)
             {
-                if (isRun)
-                    moveSpeed /= 1.5f;
-                isRun = false;
-                playerAnim.SetBool("isRun", isRun);
-                
+                moveSpeed /= 1.5f;
+                playSceneUIManager.BlinkRunKeyImage(false);
             }
-
+                
+            isRun = false;
+            playerAnim.SetBool("isRun", false);
+            playerAnim.SetBool("isWalking", false);
+            SoundManager.instance.StopSE("Player_WalkSound");
+            SoundManager.instance.StopSE("Player_RunSound");
+            //StartCoroutine(StopRunning());
+        }
+        else
+        {
+            if (!isJumping)
+                if (isRun)
+                    SoundManager.instance.PlaySE("Player_RunSound");
+                else
+                    SoundManager.instance.PlaySE("Player_WalkSound");
             Vector3 desiredForward = Vector3.RotateTowards(transform.forward, playerMovement, turnSpeed, 0f);
             playerRotation = Quaternion.LookRotation(desiredForward);
 
 
             playerRigid.MoveRotation(playerRotation);
+            if (!isJumping)
+            {
+                playerAnim.SetBool("isWalking", true);
+            }
+            else
+            {
+                if (isRun)
+                    SoundManager.instance.StopSE("Player_RunSound");
+                else {
+                    SoundManager.instance.StopSE("Player_WalkSound");
+                }
 
-            playerAnim.SetBool("isWalking", isWalking);
-        }
+                
+                playerAnim.SetBool("isWalking", false);
+            }
+            
+        } 
+            
+
         
-        playerRigid.MovePosition(playerRigid.position + playerMovement * Time.fixedDeltaTime * moveSpeed);
+        //playerRigid.AddForce(playerMovement * moveSpeed, ForceMode.Impulse);
+        //playerRigid.velocity = new Vector3(playerMovement.x * moveSpeed, y, playerMovement.z * moveSpeed);
+        //playerRigid.MovePosition(playerRigid.position + playerMovement * Time.fixedDeltaTime * moveSpeed);
     }
 
     private void TryRun()
     {
-        if (Input.GetKeyDown(KeyCode.LeftShift) & !isHit)
+        if (isHit || isWall)
+            return;
+
+        if (isRun)
+        {
+            statusController.DecreaseSp(5);
+            if (statusController.currentSp <= 0)
+                StartCoroutine(Tired());
+        }
+            
+
+        
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !isHit && !isWall)
         {
             if (isRun == false)
+            {
+                if (!isJumping)
+                    SoundManager.instance.PlaySE("Player_RunSound");
                 moveSpeed *= 1.5f;
+            }  
             else
+            {
+                SoundManager.instance.StopSE("Player_RunSound");
                 moveSpeed /= 1.5f;
+            }
+                
             isRun = !isRun;
             playerAnim.SetBool("isRun", isRun);
+            playSceneUIManager.BlinkRunKeyImage(isRun);
         }
             
     }
@@ -133,16 +210,23 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && jumpCount <= 1 && !isHit)
         {
+            playSceneUIManager.BlinkJumpKeyImage();
+
+            SoundManager.instance.StopSE("Player_RunSound");
+            SoundManager.instance.StopSE("Player_WalkSound");
             if (jumpCount != 0)
             {
-                playerAnim.SetTrigger("isTumbling");
+                playerAnim.SetTrigger("isJumping");
+                //playerAnim.SetTrigger("isTumbling");
+                playerRigid.velocity = new Vector3(playerRigid.velocity.x, jumpPower * 1.5f, playerRigid.velocity.z);
             }
             else
             {
-                   
-                playerAnim.SetTrigger("isJumping");   
+                playerAnim.SetTrigger("isTumbling");
+                //playerAnim.SetTrigger("isJumping");
+                playerRigid.velocity = new Vector3(playerRigid.velocity.x, jumpPower, playerRigid.velocity.z);
             }
-            playerRigid.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
+            //playerRigid.AddForce(Vector3.up * jumpPower, ForceMode.Impulse);
             
             jumpCount++;
 
@@ -159,6 +243,7 @@ public class PlayerController : MonoBehaviour
             playerAnim.SetTrigger("isGaurd");
             isParry = false;
             enemyAnim.SetTrigger("Hit");
+            SoundManager.instance.PlaySE("Player_GaurdSound");
         }
             
     }
@@ -182,7 +267,6 @@ public class PlayerController : MonoBehaviour
         }
             
     }
-
     private void IsGround()
     {
         if (isJumping)
@@ -192,16 +276,33 @@ public class PlayerController : MonoBehaviour
             if (Physics.Raycast(ray, out hitInfo, 0.1f))
             {
                 if (hitInfo.collider.CompareTag("Ground"))
+                {
+                    Debug.Log("땅에 가까워짐");
                     jumpCount = 2;
+                    playerAnim.SetBool("isGround", false);
+                }
+                    
             }
         } 
+    }
+
+    private IEnumerator StopRunning()
+    {
+        isHit = true;
+        yield return new WaitForSeconds(0.27f);
+        isHit = false;
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Wall") && isJumping)
         {
-            StartCoroutine(HitWall());
+            Debug.Log("점프 상태로 충돌!!");
+            playerRigid.velocity = new Vector3(0f, playerRigid.velocity.y, 0f);
+            isWall = true;
+            playerAnim.SetBool("isWalking", false);
+            playerAnim.SetBool("isRun", false);
+
         }
 
 
@@ -209,6 +310,9 @@ public class PlayerController : MonoBehaviour
         {
             jumpCount = 0;
             isJumping = false;
+            if (isWall)
+                StartCoroutine(HitWall());
+            SoundManager.instance.PlaySE("Player_LandingSound");
         }
 
         if (collision.gameObject.CompareTag("Obstacle"))
@@ -227,6 +331,7 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isJumping = true;
+            SoundManager.instance.PlaySE("Player_JumpSound");
             return;
         }
     }
@@ -237,11 +342,17 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(cameraController.IsTurnCamera(other));
         }
+
+        if (other.gameObject.CompareTag("LapPoint"))
+        {
+            StartCoroutine(cameraController.IsTurnCamera(other));
+            playSceneUIManager.UpdateCurrentLapCount();
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("TurnPoint"))
+        if (other.gameObject.CompareTag("TurnPoint") || other.gameObject.CompareTag("LapPoint"))
         {
             StartCoroutine(ExitTurnPoint(other));
             
@@ -251,7 +362,7 @@ public class PlayerController : MonoBehaviour
     private IEnumerator ExitTurnPoint(Collider other)
     {
         other.enabled = false;
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(10f);
         other.enabled = true;
     }
 
@@ -260,6 +371,8 @@ public class PlayerController : MonoBehaviour
         Debug.Log("차량과 부딪힘!!");
         playerAnim.SetTrigger("isHit");
         isHit = true;
+        isRun = false;
+        playSceneUIManager.BlinkRunKeyImage(false);
         gameObject.layer = 6;
         
         yield return new WaitForSeconds(3f);
@@ -270,8 +383,21 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator HitWall()
     {
+        playerRigid.velocity = new Vector3(0f, playerRigid.velocity.y, 0f);
+        yield return null;
+        Debug.Log("충돌 해제!!");
+        isWall = false;
+        playerAnim.SetBool("isRun", isRun);
+    }
+
+    private IEnumerator Tired()
+    {
         isHit = true;
-        yield return new WaitForSeconds(0.5f);
+        playerAnim.SetTrigger("Tired");
+
+        playerRigid.velocity = Vector3.zero;
+        yield return new WaitForSeconds(5f);
+
         isHit = false;
     }
 
@@ -284,7 +410,12 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(3f);
 
         Time.timeScale = 0f;
+
+        if (GameObject.FindWithTag("Obstacle") != null){
+            GameObject obstacle = GameObject.FindWithTag("Obstacle");
+            Destroy(obstacle);
+        }
+        SoundManager.instance.StopAllSE();
+        SoundManager.instance.StopAllBgm();
     }
-
-
 }

@@ -4,23 +4,24 @@ using UnityEngine;
 
 public class Obstacle : MonoBehaviour
 {
-    private float speed = 7;
+    protected float speed = 7;
 
     private void Update()
     {
         transform.Translate(Vector3.forward * Time.deltaTime * speed);
     }
 
-    private void OnTriggerEnter(Collider other)
+    protected void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("ObstacleEndPoint"))
             StartCoroutine(DestroyObstacle());
     }
 
-    private IEnumerator DestroyObstacle()
+    protected IEnumerator DestroyObstacle()
     {
         yield return new WaitForSeconds(1f);
 
         Destroy(gameObject);
     }
+
 }
