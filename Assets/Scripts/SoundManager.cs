@@ -26,7 +26,7 @@ public class SoundManager : MonoBehaviour
         }
             
         else
-            Destroy(instance);
+            Destroy(gameObject);
     }
     #endregion singleton
 

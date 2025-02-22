@@ -38,7 +38,6 @@ public class ObstacleSpawner : MonoBehaviour
         {
             if (i == ranPoint)
             {
-                Debug.Log("쓰레기통 생성!!");
                 Instantiate(vehicles[spawnPoints.Length-1], spawnPoints[i].position, spawnPoints[i].rotation);
             }
             else
@@ -51,6 +50,8 @@ public class ObstacleSpawner : MonoBehaviour
 
             
         }
+
+        SoundManager.instance.PlaySE("VehicleSound");
         
     }
 }

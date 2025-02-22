@@ -23,6 +23,7 @@ public class EnemyMoveController : MonoBehaviour
     {
         if (!GameManager.instance.isStart)
             return;
+            
         Vector3 direction = turnPoints[count].position - transform.position;
         direction.y = 0f;
         float distance = direction.sqrMagnitude;

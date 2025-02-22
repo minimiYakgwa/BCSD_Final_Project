@@ -61,19 +61,22 @@ public class PlayerController : MonoBehaviour
         isParry = false;
         isWall = false;
 
-        
+        gameObject.layer = 8;
+
+        StartCoroutine(StartBoost());
     }
 
     private void Update()
     {
-        if (!GameManager.instance.isStart)
-            return;
-
-        TryJump();
-        IsGround();
-        TryRun();
-        TryParry();
-        IsFall();
+        if (GameManager.instance.isStart)
+        {
+            TryJump();
+            IsGround();
+            TryRun();
+            TryParry();
+            IsFall();
+        }
+ 
     }
 
     private void FixedUpdate()
@@ -277,7 +280,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (hitInfo.collider.CompareTag("Ground"))
                 {
-                    Debug.Log("¶¥¿¡ °¡±î¿öÁü");
+
                     jumpCount = 2;
                     playerAnim.SetBool("isGround", false);
                 }
@@ -322,7 +325,7 @@ public class PlayerController : MonoBehaviour
 
         if (collision.gameObject.CompareTag("BehindEnemy"))
         {
-            StartCoroutine(HitAndGameOver());
+            HitAndGameOver();
         }
     }
 
@@ -371,7 +374,12 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Â÷·®°ú ºÎµúÈû!!");
         playerAnim.SetTrigger("isHit");
         isHit = true;
-        isRun = false;
+        
+        if (isRun)
+        {
+            moveSpeed /= 1.5f;
+            isRun = false;
+        }  
         playSceneUIManager.BlinkRunKeyImage(false);
         gameObject.layer = 6;
         
@@ -401,21 +409,20 @@ public class PlayerController : MonoBehaviour
         isHit = false;
     }
 
-    private IEnumerator HitAndGameOver()
+    private void HitAndGameOver()
     {
         isHit = true;
         playerAnim.SetTrigger("GameOver");
         gameObject.layer = 6;
+        playSceneUIManager.ShowGameOverUI();
+        StartCoroutine(GameManager.instance.FailGame());
+    }
 
+    private IEnumerator StartBoost()
+    {
+        yield return new WaitForSeconds(3.5f);
+        moveSpeed *= 1.5f;
         yield return new WaitForSeconds(3f);
-
-        Time.timeScale = 0f;
-
-        if (GameObject.FindWithTag("Obstacle") != null){
-            GameObject obstacle = GameObject.FindWithTag("Obstacle");
-            Destroy(obstacle);
-        }
-        SoundManager.instance.StopAllSE();
-        SoundManager.instance.StopAllBgm();
+        moveSpeed /= 1.5f;
     }
 }

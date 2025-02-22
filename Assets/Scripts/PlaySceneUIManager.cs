@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEditorInternal;
 using UnityEditor;
+using UnityEngine.SceneManagement;
 
 public class PlaySceneUIManager : MonoBehaviour
 {
@@ -20,20 +21,23 @@ public class PlaySceneUIManager : MonoBehaviour
     private Image jumpKeyImage;
     [SerializeField]
     private TextMeshProUGUI jumpKeyText;
-    [SerializeField]
-    private GameObject countDownUI;
+
     [SerializeField]
     private TextMeshProUGUI countDownText;
+    [SerializeField]
+    private GameObject menuUI;
 
     public int lapCount = 2;
     public int currentLapCount = 1;
 
-    private bool isStart = false;
+    public bool isPause = false;
 
     [SerializeField]
     private Image spImage;
 
     private float currentPlayTime;
+    private int currentPlayTimeMin;
+    private int currentPlayTimeSec;
 
     [SerializeField]
     private StatusController statusController;
@@ -41,18 +45,23 @@ public class PlaySceneUIManager : MonoBehaviour
     private Coroutine blinkCoroutine;
     private void Start()
     {
-        StartCoroutine(StartGame());
+        StartCoroutine(GameManager.instance.GamePlayCoroutine());
+        StartCoroutine(GameStartCountUI());
     }
 
     private void Update()
     {
-        if (!GameManager.instance.isStart)
-            return;
-        SpGagueUpdate();
-        CheckPlayTime();
-        PlayTimeUIUpdate();
-        UpdateLapCountUI();
         PauseScene();
+
+        if (GameManager.instance.isStart)
+        {
+            SpGagueUpdate();
+            CheckPlayTime();
+            PlayTimeUIUpdate();
+            UpdateLapCountUI();
+        }
+        
+        
     }
 
     private void SpGagueUpdate()
@@ -62,25 +71,28 @@ public class PlaySceneUIManager : MonoBehaviour
 
     private void CheckPlayTime()
     {
-        if (isStart)
-            currentPlayTime += Time.deltaTime;
+        currentPlayTime += Time.deltaTime;
+        currentPlayTimeMin = (int)(currentPlayTime / 60);
+        currentPlayTimeSec = (int)(currentPlayTime % 60);
     }
 
     private void PlayTimeUIUpdate()
     {
-        playTime_Text.text = ((int)(currentPlayTime / 60)).ToString() + " : " + ((int)(currentPlayTime % 60)).ToString();
+        playTime_Text.text = currentPlayTimeMin.ToString() + " : " + currentPlayTimeSec.ToString();
     }
 
     private void UpdateLapCountUI()
     {
-        lap_Text.text = currentLapCount.ToString() + " / " + lapCount.ToString();
+        lap_Text.text = currentLapCount.ToString() + " / " + lapCount.ToString() + " lap";
     }
 
     public void UpdateCurrentLapCount()
     {
         if (currentLapCount >= lapCount)
         {
-            Debug.Log("게임 클리어!!");
+            countDownText.gameObject.SetActive(true);
+            countDownText.text = "FINISH!!";
+            StartCoroutine(GameManager.instance.FinishGame(currentPlayTimeMin, currentPlayTimeSec));
         }
         else
         {
@@ -122,17 +134,12 @@ public class PlaySceneUIManager : MonoBehaviour
         jumpKeyText.color = Color.white;
     }
 
-    private void PauseScene()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            
-        }
-    }
+    
 
-    private IEnumerator StartGame()
+    private IEnumerator GameStartCountUI()
     {
-        countDownUI.SetActive(true);
+        menuUI.SetActive(false);
+        countDownText.gameObject.SetActive(true);
 
         countDownText.color = Color.yellow;
 
@@ -145,9 +152,59 @@ public class PlaySceneUIManager : MonoBehaviour
         countDownText.text = "Start";
         yield return new WaitForSeconds(0.5f);
 
-        countDownUI.SetActive(false);
+        countDownText.gameObject.SetActive(false);
 
         currentPlayTime = Time.deltaTime;
     }
 
+    public void ShowGameOverUI()
+    {
+        countDownText.text = "GAME OVER..";
+        countDownText.gameObject.SetActive(true);
+    }
+    public void ActiveMenuUI()
+    {
+        menuUI.SetActive(GameManager.instance.isStart);
+        GameManager.instance.isStart = !GameManager.instance.isStart;
+
+        if (GameManager.instance.isStart)
+        {
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+            Time.timeScale = 1;
+        }
+        else
+        {
+            SoundManager.instance.StopAllSE();
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+            Time.timeScale = 0;
+        }
+    }
+
+    public void RestartScene()
+    {
+        ActiveMenuUI();
+        SceneManager.LoadScene(1);
+    }
+
+    private void PauseScene()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape) && GameManager.instance.isStart)
+        {
+            ActiveMenuUI();
+            
+        }
+    }
+    public void ReturnTitle()
+    {
+        SoundManager.instance.StopAllBgm();
+        SoundManager.instance.StopAllSE();
+
+        SceneManager.LoadScene(0);
+    }
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
 }

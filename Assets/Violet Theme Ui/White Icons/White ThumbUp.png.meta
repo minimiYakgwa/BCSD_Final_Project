@@ -127,9 +127,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 32
-        width: 109
-        height: 324
+        y: 0
+        width: 512
+        height: 512
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -143,31 +143,10 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: White ThumbUp_1
-      rect:
-        serializedVersion: 2
-        x: 133
-        y: 10
-        width: 379
-        height: 492
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 0464f8349fde29880800000000000000
-      internalID: -8605554283115493824
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 917475c32bd07f24c815297e665a24f3
     internalID: 0
     vertices: []
     indices: 
@@ -176,7 +155,6 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       White ThumbUp_0: 6431367742336629
-      White ThumbUp_1: -8605554283115493824
   spritePackingTag: 
   pSDRemoveMatte: 0
   pSDShowRemoveMatteOption: 0
