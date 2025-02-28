@@ -24,8 +24,9 @@ public class GameManager : MonoBehaviour
 
     public bool isStart = false;
 
-    public float currentLapCount = 1;
-    public float lapCount = 1;
+
+
+    public int level;
 
     public int bestPlayTimeMin = 0;
     public int bestPlayTimeSec = 0;
@@ -33,6 +34,9 @@ public class GameManager : MonoBehaviour
     public int currentPlayTimeMin;
     public int currentPlayTimeSec;
 
+    public float easy = 2;
+    public float normal = 3;
+    public float hard = 5;
     public IEnumerator GamePlayCoroutine()
     {
 
@@ -69,10 +73,12 @@ public class GameManager : MonoBehaviour
         SoundManager.instance.StopAllSE();
 
         SoundManager.instance.PlayBgm("FinishSound");
-        yield return new WaitForSecondsRealtime(3f);
+        yield return new WaitForSecondsRealtime(2f);
 
         SoundManager.instance.StopAllSE();
         SoundManager.instance.StopAllBgm();
+        SoundManager.instance.PlayBgm("StartSound");
+        yield return new WaitForSecondsRealtime(2f);
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
@@ -82,7 +88,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator FailGame()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(2f);
 
         isStart = false;
         Time.timeScale = 0f;
@@ -90,12 +96,10 @@ public class GameManager : MonoBehaviour
         SoundManager.instance.StopAllSE();
         SoundManager.instance.StopAllBgm();
 
+        SoundManager.instance.PlayBgm("StartSound");
 
-        SoundManager.instance.PlayBgm("FailSound");
-        yield return new WaitForSecondsRealtime(3f);
-
-        SoundManager.instance.StopAllSE();
-        SoundManager.instance.StopAllBgm();
+        //SoundManager.instance.PlayBgm("FailSound");
+        yield return new WaitForSecondsRealtime(2f);
 
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;

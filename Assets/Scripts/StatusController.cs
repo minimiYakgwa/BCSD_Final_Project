@@ -20,6 +20,7 @@ public class StatusController : MonoBehaviour
 
     void Start()
     {
+        sp = 20000 / GameManager.instance.level;
         currentSp = sp;
     }
 

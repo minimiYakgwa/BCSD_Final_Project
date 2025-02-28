@@ -12,6 +12,10 @@ public class EnemyRunAwayMoveController : EnemyMoveController
 
     private bool isAttack = false;
 
+    private void Start()
+    {
+        moveSpeed = GameManager.instance.level * 2 + 2;
+    }
     private void Update()
     {
         Move();
@@ -28,7 +32,6 @@ public class EnemyRunAwayMoveController : EnemyMoveController
         {
             if (collider.name == "Player")
             {
-                Debug.Log("플레이어 감지!!");
                 StartCoroutine(AttackAndDelay());
             }
         }

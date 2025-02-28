@@ -22,7 +22,7 @@ TagManager:
   - PlayerHit
   - Obstacle
   - Player
-  - 
+  - PostProcessingVolume
   - 
   - 
   - 

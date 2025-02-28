@@ -6,7 +6,7 @@ using UnityEngine;
 public class EnemyMoveController : MonoBehaviour
 {
     [SerializeField]
-    private float moveSpeed;
+    protected float moveSpeed;
 
     [SerializeField]
     private Transform[] turnPoints;
@@ -19,6 +19,7 @@ public class EnemyMoveController : MonoBehaviour
 
     private int count = 0;
 
+    
     protected void Move()
     {
         if (!GameManager.instance.isStart)

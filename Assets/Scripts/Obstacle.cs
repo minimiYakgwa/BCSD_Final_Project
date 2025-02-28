@@ -6,6 +6,10 @@ public class Obstacle : MonoBehaviour
 {
     protected float speed = 7;
 
+    private void Start()
+    {
+        speed = GameManager.instance.level * 3.5f;
+    }
     private void Update()
     {
         transform.Translate(Vector3.forward * Time.deltaTime * speed);

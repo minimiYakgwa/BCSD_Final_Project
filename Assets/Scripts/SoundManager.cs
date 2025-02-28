@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
 [System.Serializable]
@@ -77,7 +78,8 @@ public class SoundManager : MonoBehaviour
         {
             if (_name == bgmSounds[i].name)
             {
-                audioSourceBgm[bgmSounds[i].number].Play();
+                if (!audioSourceBgm[bgmSounds[i].number].isPlaying)
+                    audioSourceBgm[bgmSounds[i].number].Play();
             }
         }
     }

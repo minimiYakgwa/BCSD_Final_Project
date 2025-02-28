@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEditorInternal;
 using UnityEditor;
 using UnityEngine.SceneManagement;
+using static UnityEngine.Rendering.DebugUI;
 
 public class PlaySceneUIManager : MonoBehaviour
 {
@@ -43,14 +44,25 @@ public class PlaySceneUIManager : MonoBehaviour
     private StatusController statusController;
 
     private Coroutine blinkCoroutine;
+
+    [SerializeField]
+    private float fadeOutTime;
+
+    [SerializeField]
+    private Image fadeOutImage;
+
     private void Start()
     {
+        SoundManager.instance.StopAllSE();
+
         StartCoroutine(GameManager.instance.GamePlayCoroutine());
         StartCoroutine(GameStartCountUI());
     }
 
     private void Update()
     {
+        UpdateLevel();
+
         PauseScene();
 
         if (GameManager.instance.isStart)
@@ -63,6 +75,11 @@ public class PlaySceneUIManager : MonoBehaviour
         
         
     }
+    private void UpdateLevel()
+    {
+        lapCount = GameManager.instance.level;
+    }
+
 
     private void SpGagueUpdate()
     {
@@ -184,8 +201,11 @@ public class PlaySceneUIManager : MonoBehaviour
 
     public void RestartScene()
     {
+        
+        SoundManager.instance.PlaySE("PressButtonSound");
+        StartCoroutine(FadeOutAndRestart());
         ActiveMenuUI();
-        SceneManager.LoadScene(1);
+
     }
 
     private void PauseScene()
@@ -200,11 +220,50 @@ public class PlaySceneUIManager : MonoBehaviour
     {
         SoundManager.instance.StopAllBgm();
         SoundManager.instance.StopAllSE();
+        SoundManager.instance.PlaySE("PressButtonSound");
 
-        SceneManager.LoadScene(0);
+        SoundManager.instance.PlayBgm("StartSound");
+
+        StartCoroutine(FadeOutAndReturnTitle());
+        
     }
     public void ExitGame()
     {
         Application.Quit();
     }
+
+    private IEnumerator FadeOutAndRestart()
+    {
+        
+        float currentTime = Time.unscaledDeltaTime;
+
+        while (currentTime <= fadeOutTime)
+        {
+            fadeOutImage.fillAmount = currentTime / fadeOutTime;
+            currentTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        fadeOutImage.fillAmount = 1f;
+
+        SceneManager.LoadScene(1);
+    }
+
+    private IEnumerator FadeOutAndReturnTitle()
+    {
+        float currentTime = Time.unscaledDeltaTime;
+
+        while (currentTime <= fadeOutTime)
+        {
+            fadeOutImage.fillAmount = currentTime / fadeOutTime;
+            currentTime += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        fadeOutImage.fillAmount = 1f;
+
+        SceneManager.LoadScene(0);
+    }
+
+
 }

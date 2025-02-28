@@ -6,6 +6,8 @@ using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.PostProcessing;
 
 public class PlayerController : MonoBehaviour
 {
@@ -48,6 +50,13 @@ public class PlayerController : MonoBehaviour
     Vector3 playerMovement = new Vector3(0, 0, 0);
     Quaternion playerRotation = Quaternion.identity;
 
+    [SerializeField]
+    private PostProcessVolume volume;
+    private LensDistortion lens;
+
+    private float startBoostIntensity = -70f;
+    private float endBoostIntensity = 0f;
+
     private void Start()
     {
         playerAnim = GetComponent<Animator>();
@@ -61,7 +70,13 @@ public class PlayerController : MonoBehaviour
         isParry = false;
         isWall = false;
 
+        moveSpeed = GameManager.instance.level * 2.5f;
         gameObject.layer = 8;
+
+        if (volume.profile.TryGetSettings(out lens))
+        {
+
+        }
 
         StartCoroutine(StartBoost());
     }
@@ -180,6 +195,7 @@ public class PlayerController : MonoBehaviour
 
         if (isRun)
         {
+
             statusController.DecreaseSp(5);
             if (statusController.currentSp <= 0)
                 StartCoroutine(Tired());
@@ -422,7 +438,9 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(3.5f);
         moveSpeed *= 1.5f;
+        lens.intensity.Override(startBoostIntensity);
         yield return new WaitForSeconds(3f);
         moveSpeed /= 1.5f;
+        lens.intensity.Override(endBoostIntensity);
     }
 }
