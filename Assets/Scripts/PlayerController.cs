@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Mono.Cecil.Cil;
 using Unity.VisualScripting;
+#if UNITY_EDITOR
 using UnityEditor.PackageManager;
+#endif
 using UnityEngine;
 using UnityEngine.UIElements;
 

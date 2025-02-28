@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+#if UNITY_EDITOR
 using UnityEditorInternal;
 using UnityEditor;
+#endif
 using UnityEngine.SceneManagement;
 
 public class PlaySceneUIManager : MonoBehaviour
