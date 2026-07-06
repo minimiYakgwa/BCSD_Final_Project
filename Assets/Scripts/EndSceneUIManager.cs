@@ -4,6 +4,7 @@ using TMPro;
 using Unity.VisualScripting;
 //using UnityEditor.U2D.Path;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -34,6 +35,9 @@ public class EndSceneUIManager : MonoBehaviour
 
     [SerializeField]
     private Image fadeOutImage;
+
+    [SerializeField]
+    private CanvasGroup inputCanvasGroup;
 
     private void Start()
     {
@@ -89,16 +93,24 @@ public class EndSceneUIManager : MonoBehaviour
     }
     public void StartGame()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.PlaySE("PressButtonSound");
         StartCoroutine(FadeOutAndRestart());
     }
     public void ExitGame()
     {
+        if (isFade)
+            return;
 
         Application.Quit();
     }
     public void ReturnTitle()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.PlaySE("PressButtonSound");
 
         StartCoroutine(FadeOutAndReturnTitle());
@@ -108,6 +120,8 @@ public class EndSceneUIManager : MonoBehaviour
 
     private IEnumerator FadeOutAndRestart()
     {
+        SetInputEnabled(false);
+
         float currentTime = Time.deltaTime;
 
         while (currentTime <= fadeOutTime)
@@ -119,11 +133,14 @@ public class EndSceneUIManager : MonoBehaviour
 
         fadeOutImage.fillAmount = 1f;
 
+        RestoreEventSystemBeforeSceneLoad();
         SceneManager.LoadScene(1);
     }
 
     private IEnumerator FadeOutAndReturnTitle()
     {
+        SetInputEnabled(false);
+
         float currentTime = Time.deltaTime;
 
         while (currentTime <= fadeOutTime)
@@ -135,7 +152,31 @@ public class EndSceneUIManager : MonoBehaviour
 
         fadeOutImage.fillAmount = 1f;
 
+        RestoreEventSystemBeforeSceneLoad();
         SceneManager.LoadScene(0);
+    }
+
+    private void RestoreEventSystemBeforeSceneLoad()
+    {
+        if (EventSystem.current != null)
+            EventSystem.current.enabled = true;
+    }
+
+    private void SetInputEnabled(bool isEnabled)
+    {
+        isFade = !isEnabled;
+
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.enabled = isEnabled;
+        }
+
+        if (inputCanvasGroup == null)
+            return;
+
+        inputCanvasGroup.interactable = isEnabled;
+        inputCanvasGroup.blocksRaycasts = isEnabled;
     }
 
 }

@@ -24,6 +24,7 @@ public class EnemyChasingMoveController : EnemyMoveController
     private void Start()
     {
         moveSpeed = GameManager.instance.level * 2 + 2;
+        hitBoxCollider.isTrigger = true;
         if (volume.profile.TryGetSettings(out vignette))
         {
 

@@ -17,6 +17,11 @@ public class StartSceneUIController : MonoBehaviour
     private Image fadeOutImage;
 
     [SerializeField]
+    private CanvasGroup inputCanvasGroup;
+
+    private bool isFade = false;
+
+    [SerializeField]
     private GameObject howToPlayUI;
 
     [SerializeField]
@@ -46,11 +51,17 @@ public class StartSceneUIController : MonoBehaviour
     }
     private void Update()
     {
+        if (isFade)
+            return;
+
         IsPushSpace();
     }
 
     public void StartGame()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
 
@@ -69,6 +80,9 @@ public class StartSceneUIController : MonoBehaviour
 
     public void SelectLevelEasy()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
         GameManager.instance.level = easy;
@@ -77,6 +91,9 @@ public class StartSceneUIController : MonoBehaviour
 
     public void SelectLevelNormal()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
         GameManager.instance.level = normal;
@@ -85,6 +102,9 @@ public class StartSceneUIController : MonoBehaviour
 
     public void SelectLevelHard()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
         GameManager.instance.level = hard;
@@ -106,17 +126,25 @@ public class StartSceneUIController : MonoBehaviour
     }
     public void ExplainGameRule()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
         StartCoroutine(SetHowToPlayUI());
     }
     public void ExitGame()
     {
+        if (isFade)
+            return;
+
         Application.Quit();
     }
 
     private IEnumerator FadeOutAndLoadScene()
     {
+        SetInputEnabled(false);
+
         float currentTime = Time.deltaTime;
 
         while (currentTime <= fadeOutTime)
@@ -128,7 +156,31 @@ public class StartSceneUIController : MonoBehaviour
 
         fadeOutImage.fillAmount = 1f;
 
+        RestoreEventSystemBeforeSceneLoad();
         SceneManager.LoadScene(1);
+    }
+
+    private void RestoreEventSystemBeforeSceneLoad()
+    {
+        if (EventSystem.current != null)
+            EventSystem.current.enabled = true;
+    }
+
+    private void SetInputEnabled(bool isEnabled)
+    {
+        isFade = !isEnabled;
+
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.enabled = isEnabled;
+        }
+
+        if (inputCanvasGroup == null)
+            return;
+
+        inputCanvasGroup.interactable = isEnabled;
+        inputCanvasGroup.blocksRaycasts = isEnabled;
     }
 
     private IEnumerator SetHowToPlayUI()
@@ -145,6 +197,9 @@ public class StartSceneUIController : MonoBehaviour
     }
     public void NextHowToPlayUI()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
         howToPlayUIRules[ruleCount].SetActive(false);
@@ -165,6 +220,9 @@ public class StartSceneUIController : MonoBehaviour
 
     public void CloseHowToPlayUI()
     {
+        if (isFade)
+            return;
+
         SoundManager.instance.StopSE("PressButtonSound");
         SoundManager.instance.PlaySE("PressButtonSound");
         menuUI.SetActive(true);

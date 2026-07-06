@@ -8953,7 +8953,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.2, y: 1.2, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &206855254
 MeshRenderer:
@@ -23292,6 +23292,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281fc8f5fda88954aa6451c96b1ef460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointerEnterMoveThreshold: 30
 --- !u!95 &555369576
 Animator:
   serializedVersion: 5
@@ -42934,7 +42935,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.2, y: 1.2, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &993266890
 PrefabInstance:
@@ -44217,6 +44218,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281fc8f5fda88954aa6451c96b1ef460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointerEnterMoveThreshold: 30
 --- !u!95 &1013706761
 Animator:
   serializedVersion: 5
@@ -45558,6 +45560,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281fc8f5fda88954aa6451c96b1ef460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointerEnterMoveThreshold: 30
 --- !u!95 &1045552700
 Animator:
   serializedVersion: 5
@@ -60382,6 +60385,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 281fc8f5fda88954aa6451c96b1ef460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointerEnterMoveThreshold: 30
 --- !u!95 &1361017127
 Animator:
   serializedVersion: 5

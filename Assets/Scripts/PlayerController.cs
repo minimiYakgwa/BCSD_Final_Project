@@ -61,6 +61,7 @@ public class PlayerController : MonoBehaviour
     {
         playerAnim = GetComponent<Animator>();
         playerRigid = GetComponent<Rigidbody>();
+        playerRigid.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         playerCollider = GetComponent<CapsuleCollider>();
 
         isWalking = false;
@@ -357,6 +358,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (other.gameObject.CompareTag("BehindEnemy"))
+        {
+            HitAndGameOver();
+            return;
+        }
+
         if (other.gameObject.CompareTag("TurnPoint"))
         {
             StartCoroutine(cameraController.IsTurnCamera(other));
@@ -428,10 +435,21 @@ public class PlayerController : MonoBehaviour
     private void HitAndGameOver()
     {
         isHit = true;
+        StopPlayerPhysicsForGameOver();
         playerAnim.SetTrigger("GameOver");
         gameObject.layer = 6;
         playSceneUIManager.ShowGameOverUI();
         StartCoroutine(GameManager.instance.FailGame());
+    }
+
+    private void StopPlayerPhysicsForGameOver()
+    {
+        playerRigid.velocity = Vector3.zero;
+        playerRigid.angularVelocity = Vector3.zero;
+        playerRigid.constraints = RigidbodyConstraints.FreezePositionX
+            | RigidbodyConstraints.FreezePositionZ
+            | RigidbodyConstraints.FreezeRotationX
+            | RigidbodyConstraints.FreezeRotationZ;
     }
 
     private IEnumerator StartBoost()
